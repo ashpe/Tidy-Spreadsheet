@@ -108,11 +108,14 @@ sub row_contains {
     my @results_array;
     my $total_results = 0;
     my $maxsheet = $spreadsheet->[0]{sheets};    
-    my $maxrow = $spreadsheet->[1]{maxrow};
-    my $maxcol = $spreadsheet->[1]{maxcol};
+    my $maxrow = 0;
+    my $maxcol = 0;
     my $cell = "";
     
     for(my $sheet = 1; $sheet<=$maxsheet; $sheet++) {
+        $maxrow = $spreadsheet->[$sheet]{maxrow};
+        $maxcol = $spreadsheet->[$sheet]{maxcol};
+
         for(my $row = 1; $row<=$maxrow; $row++) {
             for(my $col = 1; $col<=$maxcol; $col++) {
                 $cell = $spreadsheet->[$sheet]{cr2cell($col, $row)};
