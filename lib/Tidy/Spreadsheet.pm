@@ -104,13 +104,34 @@ Checks to see if a row contains a regular expression pattern, if matches adds to
 sub row_contains {
 
     my ($self, $pattern) = @_;
-	
+
+    my $maxsheet = $spreadsheet->[0]{sheets};    
+    my $maxrow = $spreadsheet->[1]{maxrow};
+    my $maxcol = $spreadsheet->[1]{maxcol};
+    my $cell = "";
+
+
     print "Available sheets -> $spreadsheet->[0]{sheets}\n";
-    print "Available rows -> $spreadsheet->[1]{maxrow}\n";
-    print "Available cols -> $spreadsheet->[1]{maxcol}\n";
+    print "Available rows -> $maxrow\n";
+    print "Available cols -> $maxcol\n";
     print "Searching for $pattern..\n";
+    
+    for(my $sheet = 1; $sheet<=$maxsheet; $sheet++) {
+        for(my $row = 1; $row<=$maxrow; $row++) {
+            for(my $col = 1; $col<=$maxcol; $col++) {
+                $cell = $spreadsheet->[$sheet]{cr2cell($col, $row)};
+                if ($cell =~ /$pattern/) {
+                    print "Match found @ " . cr2cell($col, $row) . " on sheet $sheet\n";
+                }
+                print $cell, " ";
+            }   
+        print "\n";
+        }   
+    }
 
 }
+
+
 
 =head1 AUTHOR
 
