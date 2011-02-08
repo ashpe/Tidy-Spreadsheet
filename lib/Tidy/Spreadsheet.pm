@@ -2,6 +2,9 @@ package Tidy::Spreadsheet;
 
 use warnings;
 use strict;
+use Spreadsheet::Read;
+
+my $spreadsheet = "";
 
 =head1 NAME
 
@@ -38,9 +41,47 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =cut
 
+sub load_spreadsheet {
+
+    #TODO: Add error checking once spreadsheet is loaded
+
+    my ($self, $file_name, $delimiter) = @_;
+
+    if ($file_name =~ /.csv$/) {
+        if (!$delimiter) {
+            $spreadsheet = ReadData($file_name, sep => $delimiter);
+            return 0;
+        } else {
+           die "Error; supply delimiter for csv files, check the documentation."; 
+        }
+    }
+    elsif ($file_name =~ /.xls$/) {
+        $spreadsheet = ReadData($file_name, parser => "xls");
+        return 0;
+    }
+    else {
+        $spreadsheet = ReadData($file_name);
+        return 0;
+    }
+
+}
+
+sub print_spreadsheet() {
+    if (!$spreadsheet) {
+        print "No spreadsheet has been loaded.\n";
+     } else {
+        my @row = Spreadsheet::Read::row($spreadsheet->[1],1);
+        print $spreadsheet->[1]{cr2cell(1,1)}, "\n";
+        print "@row";
+     }
+}
+
 sub get_row_contents {
     my ($self, $row_num) = @_;
-    print "Searching for $row_num\n";
+
+    my @get_row = Spreadsheet::Read::cellrow($spreadsheet->[1], $row_num);
+    my $return_value = "$row_num:" . join(":", @get_row);
+    print "$return_value\n";
 }
 
 =head2 function2
