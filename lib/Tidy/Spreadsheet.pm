@@ -51,7 +51,7 @@ sub load_spreadsheet {
     my ($self, $file_name, $delimiter) = @_;
 
     if ($file_name =~ /.csv$/) {
-        if (!$delimiter) {
+        if (defined($delimiter)) {
             $spreadsheet = ReadData($file_name, sep => $delimiter);
             return 0;
         } else {

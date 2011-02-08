@@ -6,7 +6,7 @@ use Tidy::Spreadsheet;
 
 my $csv_file = "t/test.csv";
 
-if (Tidy::Spreadsheet->load_spreadsheet($csv_file) == 0) {
+if (Tidy::Spreadsheet->load_spreadsheet($csv_file, ",") == 0) {
     print "CSV File successfully loaded\n";
 }
 
