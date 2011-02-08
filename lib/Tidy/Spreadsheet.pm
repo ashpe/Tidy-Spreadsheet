@@ -38,7 +38,9 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =cut
 
-sub function1 {
+sub get_row_contents {
+    my ($self, $row_num) = @_;
+    print "Searching for $row_num\n";
 }
 
 =head2 function2
