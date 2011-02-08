@@ -11,6 +11,6 @@ if (Tidy::Spreadsheet->load_spreadsheet($csv_file, ",") == 0) {
 }
 
 Tidy::Spreadsheet->print_spreadsheet();
-Tidy::Spreadsheet->get_row_contents(1);
+print Tidy::Spreadsheet->get_row_contents(2), "\n";
 
 Tidy::Spreadsheet->row_contains("1");

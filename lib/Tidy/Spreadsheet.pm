@@ -89,10 +89,10 @@ Further explination on sheetnumber, its the current spreadsheet tab number you a
 sub get_row_contents {
     my ($self, $row_num, $sheet_num) = @_;
     $sheet_num = 1 unless defined($sheet_num); 
-   
-    my @get_row = Spreadsheet::Read::cellrow($spreadsheet->[$sheet_num], $row_num);
+    
+    my @get_row = Spreadsheet::Read::row($spreadsheet->[$sheet_num], $row_num);
     my $return_value = "$row_num:" . join(":", @get_row);
-    print "$return_value\n";
+    return $return_value;
 }
 
 =head2 row_contains(pattern)
@@ -105,30 +105,29 @@ sub row_contains {
 
     my ($self, $pattern) = @_;
 
+    my @results_array;
+    my $total_results = 0;
     my $maxsheet = $spreadsheet->[0]{sheets};    
     my $maxrow = $spreadsheet->[1]{maxrow};
     my $maxcol = $spreadsheet->[1]{maxcol};
     my $cell = "";
-
-
-    print "Available sheets -> $spreadsheet->[0]{sheets}\n";
-    print "Available rows -> $maxrow\n";
-    print "Available cols -> $maxcol\n";
-    print "Searching for $pattern..\n";
     
     for(my $sheet = 1; $sheet<=$maxsheet; $sheet++) {
         for(my $row = 1; $row<=$maxrow; $row++) {
             for(my $col = 1; $col<=$maxcol; $col++) {
                 $cell = $spreadsheet->[$sheet]{cr2cell($col, $row)};
                 if ($cell =~ /$pattern/) {
+                    $results_array[$total_results] = Tidy::Spreadsheet->get_row_contents($row);
                     print "Match found @ " . cr2cell($col, $row) . " on sheet $sheet\n";
+                    $total_results += 1;
                 }
-                print $cell, " ";
+                #print $cell, " ";
             }   
-        print "\n";
         }   
     }
-
+    
+    print "\nRows found;\n";
+    print "@results_array\n";
 }
 
 
