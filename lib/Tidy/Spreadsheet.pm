@@ -30,21 +30,24 @@ Perhaps a little code snippet.
     my $foo = Tidy::Spreadsheet->new();
     ...
 
-=head1 EXPORT
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
-
 =head1 SUBROUTINES/METHODS
 
-=head2 function1
+=head2 load_spreadsheet
+
+Load a spreadsheet into the modules for use with other functions.
+
+example; Tidy::Spreadsheet->load_spreadsheet("spreadsheet.xls");
+
+or for a csv file, you need to specify the delimiters.
+
+example; Tidy::Spreadsheet->load_spreadsheet("spreadsheet.csv", ","); 
 
 =cut
 
 sub load_spreadsheet {
 
     #TODO: Add error checking once spreadsheet is loaded
-
+    #TODO: Check if it's blank etc.
     my ($self, $file_name, $delimiter) = @_;
 
     if ($file_name =~ /.csv$/) {
@@ -71,24 +74,42 @@ sub print_spreadsheet() {
         print "No spreadsheet has been loaded.\n";
      } else {
         my @row = Spreadsheet::Read::row($spreadsheet->[1],1);
-        print $spreadsheet->[1]{cr2cell(1,1)}, "\n";
-        print "@row";
+        print "@row\n";
      }
 }
 
-sub get_row_contents {
-    my ($self, $row_num) = @_;
+=head2 get_row_contents(row number, sheetnumber) 
 
-    my @get_row = Spreadsheet::Read::cellrow($spreadsheet->[1], $row_num);
+Sheetnumber is optional, will default to the first spreadsheet if not set, row number is the row number!
+
+Further explination on sheetnumber, its the current spreadsheet tab number you are viewing starting at 1.
+
+=cut 
+
+sub get_row_contents {
+    my ($self, $row_num, $sheet_num) = @_;
+    $sheet_num = 1 unless defined($sheet_num); 
+   
+    my @get_row = Spreadsheet::Read::cellrow($spreadsheet->[$sheet_num], $row_num);
     my $return_value = "$row_num:" . join(":", @get_row);
     print "$return_value\n";
 }
 
-=head2 function2
+=head2 row_contains(pattern)
+
+Checks to see if a row contains a regular expression pattern, if matches adds to array and returns the row with row number appended to the front.
 
 =cut
 
-sub function2 {
+sub row_contains {
+
+    my ($self, $pattern) = @_;
+	
+    print "Available sheets -> $spreadsheet->[0]{sheets}\n";
+    print "Available rows -> $spreadsheet->[1]{maxrow}\n";
+    print "Available cols -> $spreadsheet->[1]{maxcol}\n";
+    print "Searching for $pattern..\n";
+
 }
 
 =head1 AUTHOR
