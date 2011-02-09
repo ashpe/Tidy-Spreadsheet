@@ -3,7 +3,7 @@ package Tidy::Spreadsheet;
 use warnings;
 use strict;
 use Spreadsheet::Read;
-use Carp qw( croak);
+
 my $spreadsheet = "";
 
 =head1 NAME
@@ -17,7 +17,6 @@ Version 0.01
 =cut
 
 our $VERSION = '0.01';
-
 
 =head1 SYNOPSIS
 
@@ -48,18 +47,20 @@ sub load_spreadsheet {
 
     #TODO: Add error checking once spreadsheet is loaded
     #TODO: Check if it's blank etc.
-    my ($self, $file_name, $delimiter) = @_;
+    my ( $self, $file_name, $delimiter ) = @_;
 
-    if ($file_name =~ /.csv$/) {
-        if (defined($delimiter)) {
-            $spreadsheet = ReadData($file_name, sep => $delimiter);
+    if ( $file_name =~ /.csv$/ ) {
+        if ( defined($delimiter) ) {
+            $spreadsheet = ReadData( $file_name, sep => $delimiter );
             return 0;
-        } else {
-           croak "Error; supply delimiter for csv files, check the documentation."; 
+        }
+        else {
+            die
+              "Error; supply delimiter for csv files, check the documentation.";
         }
     }
-    elsif ($file_name =~ /.xls$/) {
-        $spreadsheet = ReadData($file_name, parser => "xls");
+    elsif ( $file_name =~ /.xls$/ ) {
+        $spreadsheet = ReadData( $file_name, parser => "xls" );
         return 0;
     }
     else {
@@ -70,13 +71,13 @@ sub load_spreadsheet {
 }
 
 sub print_spreadsheet() {
-    if (!$spreadsheet) {
+    if ( !$spreadsheet ) {
         print "No spreadsheet has been loaded.\n";
-     } else {
-        my @row = Spreadsheet::Read::row($spreadsheet->[1],1);
+    }
+    else {
+        my @row = Spreadsheet::Read::row( $spreadsheet->[1], 1 );
         print "@row\n";
-     }
-     return;
+    }
 }
 
 =head2 get_row_contents(row number, sheetnumber) 
@@ -88,11 +89,12 @@ Further explination on sheetnumber, its the current spreadsheet tab number you a
 =cut 
 
 sub get_row_contents {
-    my ($self, $row_num, $sheet_num) = @_;
-    $sheet_num = 1 unless defined($sheet_num); 
-    
-    my @get_row = Spreadsheet::Read::row($spreadsheet->[$sheet_num], $row_num);
-    my $return_value = "$row_num:" . join(":", @get_row);
+    my ( $self, $row_num, $sheet_num ) = @_;
+    $sheet_num = 1 unless defined($sheet_num);
+
+    my @get_row =
+      Spreadsheet::Read::row( $spreadsheet->[$sheet_num], $row_num );
+    my $return_value = "$row_num:" . join ( ":", @get_row );
     return $return_value;
 }
 
@@ -104,38 +106,39 @@ Checks to see if a row contains a regular expression pattern, if matches adds to
 
 sub row_contains {
 
-    my ($self, $pattern) = @_;
+    my ( $self, $pattern ) = @_;
 
     my @results_array;
     my $total_results = 0;
-    my $maxsheet = $spreadsheet->[0]{sheets};    
-    my $maxrow = 0;
-    my $maxcol = 0;
-    my $cell = "";
-    
-    for(my $sheet = 1; $sheet<=$maxsheet; $sheet++) {
+    my $maxsheet      = $spreadsheet->[0]{sheets};
+    my $maxrow        = 0;
+    my $maxcol        = 0;
+    my $cell          = "";
+
+    for ( my $sheet = 1 ; $sheet <= $maxsheet ; $sheet++ ) {
         $maxrow = $spreadsheet->[$sheet]{maxrow};
         $maxcol = $spreadsheet->[$sheet]{maxcol};
 
-        for(my $row = 1; $row<=$maxrow; $row++) {
-            for(my $col = 1; $col<=$maxcol; $col++) {
-                $cell = $spreadsheet->[$sheet]{cr2cell($col, $row)};
-                if ($cell =~ /$pattern/) {
-                    $results_array[$total_results] = Tidy::Spreadsheet->get_row_contents($row);
-                    print "Match found @ " . cr2cell($col, $row) . " on sheet $sheet\n";
+        for ( my $row = 1 ; $row <= $maxrow ; $row++ ) {
+            for ( my $col = 1 ; $col <= $maxcol ; $col++ ) {
+                $cell = $spreadsheet->[$sheet]{ cr2cell( $col, $row ) };
+                if ( $cell =~ /$pattern/ ) {
+                    $results_array[$total_results] =
+                      Tidy::Spreadsheet->get_row_contents($row);
+                    print "Match found @ "
+                      . cr2cell( $col, $row )
+                      . " on sheet $sheet\n";
                     $total_results += 1;
                 }
+
                 #print $cell, " ";
-            }   
-        }   
+            }
+        }
     }
-    
+
     print "\nRows found;\n";
     print "@results_array\n";
-    return @results_array;
 }
-
-
 
 =head1 AUTHOR
 
@@ -196,4 +199,4 @@ See http://dev.perl.org/licenses/ for more information.
 
 =cut
 
-1; # End of Tidy::Spreadsheet
+1;    # End of Tidy::Spreadsheet
