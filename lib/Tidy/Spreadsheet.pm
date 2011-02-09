@@ -135,7 +135,61 @@ sub row_contains {
     return @results_array;
 }
 
+=head2 get_headers() 
 
+Returns array of headers.
+
+=cut
+
+sub get_headers {
+    my ($self) = @_;
+
+    my @return_array = split(":", Tidy::Spreadsheet->get_row_contents(1));
+    shift @return_array;
+    return @return_array;
+}
+
+=head2 get_contents(Sheetnumber)
+
+    Returns all the content of the sheet provided for currently loaded spreadsheet. Removes header from return value.
+
+=cut
+
+sub get_contents {
+
+    my ($self, $sheet) = @_;
+    $sheet = 1 unless defined($sheet);
+
+    my $maxrow=$spreadsheet->[$sheet]{maxrow};
+    my $maxcol=$spreadsheet->[$sheet]{maxcol};
+    my $cell = "";
+    my @return_contents;
+
+    for(my $row=2; $row<=$maxrow; $row++) {
+        my @row_contents;
+        for(my $col=1; $col<=$maxcol; $col++) {
+            $cell = $spreadsheet->[$sheet]{cr2cell($col,$row)};            push(@row_contents, $cell);
+        }
+        push(@return_contents, \@row_contents);
+    } 
+
+    return @return_contents;    
+
+}
+
+=head2 row_split(row, delimiter(s), optional column) 
+
+Splits a row into multiple rows, depending on how many are found. Can specify a specific column where the row should split, if left blank will search through every column and split all possible matches. To match based on a search string, and not specifying the row number see row_splitmatch.
+
+=cut
+
+sub row_split {
+    my ($self, $row, $delimiter, $col) = @_;
+    $col = 0 unless defined($col);
+
+    #TODO: Load get_row_contents(1) into headers, shift(@array) to remove the row at the start of the line, then replace all 
+    #      colons with spaces and put inside a worksheet. Repeat process with the remaining rows afterwards. 
+}
 
 =head1 AUTHOR
 

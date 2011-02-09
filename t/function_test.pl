@@ -6,6 +6,25 @@ use Tidy::Spreadsheet;
 
 my $csv_file = "t/test.csv";
 
+Tidy::Spreadsheet->load_spreadsheet("t/largetest.xls");
+
+my @headers_array = Tidy::Spreadsheet->get_headers();
+my @contents = Tidy::Spreadsheet->get_contents();
+
+print "@headers_array\n";
+for my $i (0..$#contents) {
+    for my $j (0..$#{$contents[$i]}) {
+        if (defined($contents[$i][$j])) {
+            print "$contents[$i][$j] ";
+        }
+    }
+    print "\n";
+}
+
+
+
+__END__
+
 if (Tidy::Spreadsheet->load_spreadsheet($csv_file, ",") == 0) {
     print "CSV File successfully loaded\n";
 }
