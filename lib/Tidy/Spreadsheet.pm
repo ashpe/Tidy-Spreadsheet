@@ -3,7 +3,8 @@ package Tidy::Spreadsheet;
 use warnings;
 use strict;
 use Spreadsheet::Read;
-use Carp qw( croak);
+use Spreadsheet::SimpleExcel;
+use Carp qw( croak );
 my $spreadsheet = "";
 
 =head1 NAME
@@ -45,7 +46,6 @@ example; Tidy::Spreadsheet->load_spreadsheet("spreadsheet.csv", ",");
 =cut
 
 sub load_spreadsheet {
-
     #TODO: Add error checking once spreadsheet is loaded
     #TODO: Check if it's blank etc.
     my ($self, $file_name, $delimiter) = @_;
@@ -78,6 +78,24 @@ sub print_spreadsheet() {
      }
      return;
 }
+
+=head2 save_contents(filename, headers, contents)
+
+Saves file. Overwrites old file if required.
+
+=cut
+
+sub save_contents {
+
+    my ($self, $filename, $header, $content) = @_;
+
+    my $excel = Spreadsheet::SimpleExcel->new();
+
+    $excel->add_worksheet('Sheet 1', {-headers => $header, -data => $content});
+
+    $excel->output_to_file($filename) or die $excel->errstr();
+}
+
 
 =head2 get_row_contents(row number, sheetnumber) 
 
@@ -117,7 +135,7 @@ sub row_contains {
         $maxrow = $spreadsheet->[$sheet]{maxrow};
         $maxcol = $spreadsheet->[$sheet]{maxcol};
 
-        for(my $row = 1; $row<=$maxrow; $row++) {
+        for(my $row = 2; $row<=$maxrow; $row++) {
             for(my $col = 1; $col<=$maxcol; $col++) {
                 $cell = $spreadsheet->[$sheet]{cr2cell($col, $row)};
                 if ($cell =~ /$pattern/) {

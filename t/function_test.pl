@@ -4,9 +4,9 @@ use strict;
 use warnings;
 use Tidy::Spreadsheet;
 
-my $csv_file = "t/test.csv";
+#my $csv_file = "t/test.csv";
 
-Tidy::Spreadsheet->load_spreadsheet("t/largetest.xls");
+Tidy::Spreadsheet->load_spreadsheet($ARGV[0]);
 
 my @headers_array = Tidy::Spreadsheet->get_headers();
 my @contents = Tidy::Spreadsheet->get_contents();
@@ -21,7 +21,7 @@ for my $i (0..$#contents) {
     print "\n";
 }
 
-
+Tidy::Spreadsheet->save_contents("test.xls", \@headers_array, \@contents);
 
 __END__
 
