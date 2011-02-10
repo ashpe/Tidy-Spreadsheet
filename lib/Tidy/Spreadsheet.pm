@@ -131,11 +131,11 @@ sub row_contains {
     my $maxcol        = 0;
     my $cell          = q{ };
 
-    for ( my $sheet = 1 ; $sheet <= $maxsheet ; $sheet++ ) {
+    for my $sheet (  1..$maxsheet ) {
         $maxrow = $spreadsheet->[$sheet]{maxrow};
         $maxcol = $spreadsheet->[$sheet]{maxcol};
-        for ( my $row = 2 ; $row <= $maxrow ; $row++ ) {
-            for ( my $col = 1 ; $col <= $maxcol ; $col++ ) {
+        for my $row ( 2..$maxrow ) {
+            for my $col ( 1..$maxcol ) {
                 $cell = $spreadsheet->[$sheet]{ cr2cell( $col, $row ) };
                 if ( $cell =~ /$pattern/ ) {
                     $results_array[$total_results] =
@@ -178,9 +178,9 @@ sub get_contents {
     my $cell  = q{ };
     my @return_contents;
 
-    for ( my $row = 2 ; $row <= $maxrow ; $row++ ) {
+    for my $row ( 2..$maxrow ) {
         my @row_contents;
-        for ( my $col = 1 ; $col <= $maxcol ; $col++ ) {
+        for my $col ( 1..$maxcol ) {
             $cell = $spreadsheet->[$sheet]{ cr2cell( $col, $row ) };
             push @row_contents, $cell;
         }
