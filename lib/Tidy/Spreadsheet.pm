@@ -209,7 +209,7 @@ Splits a row into multiple rows, depending on how many are found. Can specify a 
 
 sub row_split {
     my ($self, $row, $delimiter, $col) = @_;
-    $col = 0 unless defined($col);
+    $col = -1 unless defined($col);
 
     my @content = $self->get_contents();
 
@@ -221,37 +221,38 @@ sub row_split {
         my $column = 0;
         @insert_array = ();
         foreach my $element (@$arrayref) {
+            # Check field has a value and it matches.
             if (defined($element)) {
-                if ($element =~ /$delimiter/) {
-                    my $test = $element;
-                    my @split_array = split($delimiter, $test);
+                if ($element =~ /$delimiter/ && $element ne $delimiter) {
+                    my $tmp = $element;
+                    my @split_array = split($delimiter, $tmp);
 
-                    $element = $split_array[0]; 
-                    $insert_array[$column] = $split_array[1];
-
+                    if ($col == -1) {
+                        
+                        #Overwrite our old value/set new intoarray
+                        $element = $split_array[0]; 
+                        $insert_array[$column] = $split_array[1];
+                    }
+                    elsif ($col == $column) {
+                        # Do the same but only on specified column    
+                        $element = $split_array[0];
+                        $insert_array[$column] = $split_array[1];
+                    }
                 }
-
+                # Splice required fields into content
                 if ($column == $maxcol-1 && @insert_array) {
                     my @insert = @insert_array;
                     splice @content, $row_num, 0, \@insert;
                 }
+                #Inc current column
                 $column +=1;
             }
         }
+        #Inc current row
         $row_num += 1;
     }
 
-
-    for my $i (0..$#content) {
-        for my $j (0..$#{$content[$i]}) {
-            if (defined($content[$i][$j])) {
-                print "$content[$i][$j] ";
-            } else {
-                print "  ";
-            }
-        }
-        print "\n";
-    }
+    return @content;
 }
 
 =head1 AUTHOR
