@@ -74,16 +74,6 @@ sub load_spreadsheet {
 
 }
 
-sub print_spreadsheet() {
-    if (!$spreadsheet) {
-        print "No spreadsheet has been loaded.\n";
-    } else {
-        my @row = Spreadsheet::Read::row($spreadsheet->[1],1);
-        print "@row\n";
-    }
-    return;
-}
-
 =head2 save_contents(filename, headers, contents)
 
 Saves file. Overwrites old file if required.
