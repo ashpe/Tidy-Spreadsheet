@@ -19,7 +19,6 @@ Version 0.01
 
 our $VERSION = '0.01';
 
-
 =head1 SYNOPSIS
 
 Quick summary of what the module does.
@@ -47,24 +46,26 @@ example; Tidy::Spreadsheet->load_spreadsheet("spreadsheet.csv", ",");
 
 sub new {
     my $package = shift;
-    return bless({}, $package);
+    return bless( {}, $package );
 }
 
 sub load_spreadsheet {
+
     #TODO: Add error checking once spreadsheet is loaded
     #TODO: Check if it's blank etc.
-    my ($self, $file_name, $delimiter) = @_;
+    my ( $self, $file_name, $delimiter ) = @_;
 
-    if ($file_name =~ /.csv$/) {
-        if (defined($delimiter)) {
-            $spreadsheet = ReadData($file_name, sep => $delimiter);
+    if ( $file_name =~ /.csv$/ ) {
+        if ( defined($delimiter) ) {
+            $spreadsheet = ReadData( $file_name, sep => $delimiter );
             return 0;
-        } else {
-            croak "Error; no delimiter supplied for csv file"; 
+        }
+        else {
+            croak "Error; no delimiter supplied for csv file";
         }
     }
-    elsif ($file_name =~ /.xls$/) {
-        $spreadsheet = ReadData($file_name, parser => "xls");
+    elsif ( $file_name =~ /.xls$/ ) {
+        $spreadsheet = ReadData( $file_name, parser => "xls" );
         return 0;
     }
     else {
@@ -82,15 +83,15 @@ Saves file. Overwrites old file if required.
 
 sub save_contents {
 
-    my ($self, $filename, $header, $content) = @_;
+    my ( $self, $filename, $header, $content ) = @_;
 
     my $excel = Spreadsheet::SimpleExcel->new();
 
-    $excel->add_worksheet('Sheet 1', {-headers => $header, -data => $content});
+    $excel->add_worksheet( 'Sheet 1',
+        { -headers => $header, -data => $content } );
 
     $excel->output_to_file($filename) or die $excel->errstr();
 }
-
 
 =head2 get_row_contents(row number, sheetnumber) 
 
@@ -101,11 +102,12 @@ Further explination on sheetnumber, its the current spreadsheet tab number you a
 =cut 
 
 sub get_row_contents {
-    my ($self, $row_num, $sheet_num) = @_;
-    $sheet_num = 1 unless defined($sheet_num); 
+    my ( $self, $row_num, $sheet_num ) = @_;
+    $sheet_num = 1 unless defined($sheet_num);
 
-    my @get_row = Spreadsheet::Read::row($spreadsheet->[$sheet_num], $row_num);
-    my $return_value = "$row_num:" . join(":", @get_row);
+    my @get_row =
+      Spreadsheet::Read::row( $spreadsheet->[$sheet_num], $row_num );
+    my $return_value = "$row_num:" . join ( ":", @get_row );
     return $return_value;
 }
 
@@ -117,30 +119,34 @@ Checks to see if a row contains a regular expression pattern, if matches adds to
 
 sub row_contains {
 
-    my ($self, $pattern) = @_;
+    my ( $self, $pattern ) = @_;
 
     my @results_array;
     my $total_results = 0;
-    my $maxsheet = $spreadsheet->[0]{sheets};    
-    my $maxrow = 0;
-    my $maxcol = 0;
-    my $cell = "";
+    my $maxsheet      = $spreadsheet->[0]{sheets};
+    my $maxrow        = 0;
+    my $maxcol        = 0;
+    my $cell          = "";
 
-    for(my $sheet = 1; $sheet<=$maxsheet; $sheet++) {
+    for ( my $sheet = 1 ; $sheet <= $maxsheet ; $sheet++ ) {
         $maxrow = $spreadsheet->[$sheet]{maxrow};
         $maxcol = $spreadsheet->[$sheet]{maxcol};
 
-        for(my $row = 2; $row<=$maxrow; $row++) {
-            for(my $col = 1; $col<=$maxcol; $col++) {
-                $cell = $spreadsheet->[$sheet]{cr2cell($col, $row)};
-                if ($cell =~ /$pattern/) {
-                    $results_array[$total_results] = $self->get_row_contents($row);
-                    print "Match found @ " . cr2cell($col, $row) . " on sheet $sheet\n";
+        for ( my $row = 2 ; $row <= $maxrow ; $row++ ) {
+            for ( my $col = 1 ; $col <= $maxcol ; $col++ ) {
+                $cell = $spreadsheet->[$sheet]{ cr2cell( $col, $row ) };
+                if ( $cell =~ /$pattern/ ) {
+                    $results_array[$total_results] =
+                      $self->get_row_contents($row);
+                    print "Match found @ "
+                      . cr2cell( $col, $row )
+                      . " on sheet $sheet\n";
                     $total_results += 1;
                 }
+
                 #print $cell, " ";
-            }   
-        }   
+            }
+        }
     }
 
     print "\nRows found;\n";
@@ -157,7 +163,7 @@ Returns array of headers.
 sub get_headers {
     my ($self) = @_;
 
-    my @return_array = split(":", $self->get_row_contents(1));
+    my @return_array = split ( ":", $self->get_row_contents(1) );
     shift @return_array;
     return @return_array;
 }
@@ -170,26 +176,26 @@ sub get_headers {
 
 sub get_contents {
 
-    my ($self, $sheet) = @_;
+    my ( $self, $sheet ) = @_;
     $sheet = 1 unless defined($sheet);
 
-    my $maxrow=$spreadsheet->[$sheet]{maxrow};
-    my $maxcol=$spreadsheet->[$sheet]{maxcol};
-    my $cell = "";
+    my $maxrow = $spreadsheet->[$sheet]{maxrow};
+    my $maxcol = $spreadsheet->[$sheet]{maxcol};
+    my $cell   = "";
     my @return_contents;
 
-    for(my $row=2; $row<=$maxrow; $row++) {
+    for ( my $row = 2 ; $row <= $maxrow ; $row++ ) {
         my @row_contents;
-        for(my $col=1; $col<=$maxcol; $col++) {
-            $cell = $spreadsheet->[$sheet]{cr2cell($col,$row)};            push(@row_contents, $cell);
+        for ( my $col = 1 ; $col <= $maxcol ; $col++ ) {
+            $cell = $spreadsheet->[$sheet]{ cr2cell( $col, $row ) };
+            push ( @row_contents, $cell );
         }
-        push(@return_contents, \@row_contents);
-    } 
+        push ( @return_contents, \@row_contents );
+    }
 
-    return @return_contents;    
+    return @return_contents;
 
 }
-
 
 =head2 prepare_to_insert(@splitarray, @array to prepare into) 
 
@@ -199,32 +205,32 @@ Prepares the array for inserting back into the excel file.
 
 sub prepare_to_insert {
 
-    my ($self, $column, $split_array, $insert_array) = @_;
+    my ( $self, $column, $split_array, $insert_array ) = @_;
 
-    for(my $s=1; $s < scalar(@$split_array); $s++) {
-        my @tmp_array = ();                  
-        if (scalar(@$split_array) >= 2) {
+    for ( my $s = 1 ; $s < scalar(@$split_array) ; $s++ ) {
+        my @tmp_array = ();
+        if ( scalar(@$split_array) >= 2 ) {
             @tmp_array = $split_array->[$s];
-        } else {
+        }
+        else {
             $tmp_array[0] = $split_array->[1];
         }
 
         my @tmp_insert = ();
-        for(my $i = 0;$i <= $column; $i++) {
-            if ($i != $column) {
-                $tmp_insert[$i]= " ";
+        for ( my $i = 0 ; $i <= $column ; $i++ ) {
+            if ( $i != $column ) {
+                $tmp_insert[$i] = " ";
             }
             else {
-                $tmp_insert[$i]=$tmp_array[0];
-            } 
+                $tmp_insert[$i] = $tmp_array[0];
+            }
         }
         if (@tmp_insert) {
-            @{$insert_array->[$column][$s]}=@tmp_insert;
+            @{ $insert_array->[$column][$s] } = @tmp_insert;
         }
     }
 
 }
-
 
 =head2 row_split(row, delimiter(s), optional column) 
 
@@ -233,50 +239,58 @@ Splits a row into multiple rows, depending on how many are found. Can specify a 
 =cut
 
 sub row_split {
-    my ($self, $row, $delimiter, $col) = @_;
+    my ( $self, $row, $delimiter, $col ) = @_;
     $col = -1 unless defined($col);
 
     my @content = $self->get_contents();
 
     my @insert_array = ();
-    my $row_num = 0;
-    my $maxcol = $spreadsheet->[1]{maxcol};
+    my $row_num      = 0;
+    my $maxcol       = $spreadsheet->[1]{maxcol};
 
     foreach my $arrayref (@content) {
         my $column = 0;
         @insert_array = ();
         foreach my $element (@$arrayref) {
+
             # Check field has a value and it matches.
-            if (defined($element)) {
-                if ($element =~ /$delimiter/ && $element ne $delimiter) {
+            if ( defined($element) ) {
+                if ( $element =~ /$delimiter/ && $element ne $delimiter ) {
                     my $tmp = $element;
-                    my @split_array = split($delimiter, $tmp);
-                    if ($col == -1) {
+                    my @split_array = split ( $delimiter, $tmp );
+                    if ( $col == -1 ) {
+
                         #Overwrite our old value/set new intoarray
                         $element = $split_array[0];
-                        $self->prepare_to_insert($column, \@split_array, \@insert_array);
+                        $self->prepare_to_insert( $column, \@split_array,
+                            \@insert_array );
                     }
-                    elsif ($col == $column) {
-                        # Do the same but only on specified column    
+                    elsif ( $col == $column ) {
+
+                        # Do the same but only on specified column
                         $element = $split_array[0];
-                        $self->prepare_to_insert($column, \@split_array, \@insert_array);
+                        $self->prepare_to_insert( $column, \@split_array,
+                            \@insert_array );
                     }
                 }
-# Splice required fields into content
-                if ($column == $maxcol-1 && @insert_array) {
+
+                # Splice required fields into content
+                if ( $column == $maxcol - 1 && @insert_array ) {
                     foreach my $colref (@insert_array) {
                         foreach my $arr (@$colref) {
-                            if (defined($arr)) {
+                            if ( defined($arr) ) {
                                 splice @content, $row_num, 0, $arr;
                             }
                         }
                     }
 
                 }
+
                 #Inc current column
-                $column +=1;
+                $column += 1;
             }
         }
+
         #Inc current row
         $row_num += 1;
     }
@@ -343,4 +357,4 @@ See http://dev.perl.org/licenses/ for more information.
 
 =cut
 
-1; # End of Tidy::Spreadsheet
+1;    # End of Tidy::Spreadsheet
