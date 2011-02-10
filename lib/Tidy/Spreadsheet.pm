@@ -228,10 +228,30 @@ sub row_split {
                     my @split_array = split($delimiter, $tmp);
 
                     if ($col == -1) {
-                        
+
                         #Overwrite our old value/set new intoarray
-                        $element = $split_array[0]; 
-                        $insert_array[$column] = $split_array[1];
+                        $element = $split_array[0];
+                        for(my $s=1; $s <= $#split_array; $s++) {
+                            my @tmp_array = ();                  
+                            if ($#split_array >= 2) {
+                                @tmp_array = $split_array[$s];
+                            } else {
+                                $tmp_array[0] = $split_array[1];
+                            }
+                            my @tmp_insert = ();
+                            for(my $l = 0;$l <= $column; $l++) {
+
+                                if ($l != $column) {
+                                    $tmp_insert[$l]= " ";
+                                }
+                                else {
+                                    $tmp_insert[$l]=$tmp_array[0];
+                                } 
+                            }
+                            if (@tmp_insert) {
+                                @{$insert_array[$column][$s]}=@tmp_insert;
+                            }
+                        }
                     }
                     elsif ($col == $column) {
                         # Do the same but only on specified column    
@@ -241,8 +261,14 @@ sub row_split {
                 }
                 # Splice required fields into content
                 if ($column == $maxcol-1 && @insert_array) {
-                    my @insert = @insert_array;
-                    splice @content, $row_num, 0, \@insert;
+                    foreach my $colref (@insert_array) {
+                        foreach my $arr (@$colref) {
+                            if (defined($arr)) {
+                                splice @content, $row_num, 0, $arr;
+                            }
+                        }
+                    }
+
                 }
                 #Inc current column
                 $column +=1;
