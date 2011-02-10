@@ -45,6 +45,11 @@ example; Tidy::Spreadsheet->load_spreadsheet("spreadsheet.csv", ",");
 
 =cut
 
+sub new {
+    my $package = shift;
+    return bless({}, $package);
+}
+
 sub load_spreadsheet {
     #TODO: Add error checking once spreadsheet is loaded
     #TODO: Check if it's blank etc.
@@ -55,7 +60,7 @@ sub load_spreadsheet {
             $spreadsheet = ReadData($file_name, sep => $delimiter);
             return 0;
         } else {
-           croak "Error; supply delimiter for csv files, check the documentation."; 
+            croak "Error; no delimiter supplied for csv file"; 
         }
     }
     elsif ($file_name =~ /.xls$/) {
@@ -72,11 +77,11 @@ sub load_spreadsheet {
 sub print_spreadsheet() {
     if (!$spreadsheet) {
         print "No spreadsheet has been loaded.\n";
-     } else {
+    } else {
         my @row = Spreadsheet::Read::row($spreadsheet->[1],1);
         print "@row\n";
-     }
-     return;
+    }
+    return;
 }
 
 =head2 save_contents(filename, headers, contents)
@@ -108,7 +113,7 @@ Further explination on sheetnumber, its the current spreadsheet tab number you a
 sub get_row_contents {
     my ($self, $row_num, $sheet_num) = @_;
     $sheet_num = 1 unless defined($sheet_num); 
-    
+
     my @get_row = Spreadsheet::Read::row($spreadsheet->[$sheet_num], $row_num);
     my $return_value = "$row_num:" . join(":", @get_row);
     return $return_value;
@@ -130,7 +135,7 @@ sub row_contains {
     my $maxrow = 0;
     my $maxcol = 0;
     my $cell = "";
-    
+
     for(my $sheet = 1; $sheet<=$maxsheet; $sheet++) {
         $maxrow = $spreadsheet->[$sheet]{maxrow};
         $maxcol = $spreadsheet->[$sheet]{maxcol};
@@ -139,7 +144,7 @@ sub row_contains {
             for(my $col = 1; $col<=$maxcol; $col++) {
                 $cell = $spreadsheet->[$sheet]{cr2cell($col, $row)};
                 if ($cell =~ /$pattern/) {
-                    $results_array[$total_results] = Tidy::Spreadsheet->get_row_contents($row);
+                    $results_array[$total_results] = $self->get_row_contents($row);
                     print "Match found @ " . cr2cell($col, $row) . " on sheet $sheet\n";
                     $total_results += 1;
                 }
@@ -147,7 +152,7 @@ sub row_contains {
             }   
         }   
     }
-    
+
     print "\nRows found;\n";
     print "@results_array\n";
     return @results_array;
@@ -162,7 +167,7 @@ Returns array of headers.
 sub get_headers {
     my ($self) = @_;
 
-    my @return_array = split(":", Tidy::Spreadsheet->get_row_contents(1));
+    my @return_array = split(":", $self->get_row_contents(1));
     shift @return_array;
     return @return_array;
 }
@@ -195,6 +200,7 @@ sub get_contents {
 
 }
 
+
 =head2 row_split(row, delimiter(s), optional column) 
 
 Splits a row into multiple rows, depending on how many are found. Can specify a specific column where the row should split, if left blank will search through every column and split all possible matches. To match based on a search string, and not specifying the row number see row_splitmatch.
@@ -205,8 +211,47 @@ sub row_split {
     my ($self, $row, $delimiter, $col) = @_;
     $col = 0 unless defined($col);
 
-    #TODO: Load get_row_contents(1) into headers, shift(@array) to remove the row at the start of the line, then replace all 
-    #      colons with spaces and put inside a worksheet. Repeat process with the remaining rows afterwards. 
+    my @content = $self->get_contents();
+
+    my @insert_array = ();
+    my $row_num = 0;
+    my $maxcol = $spreadsheet->[1]{maxcol};
+
+    foreach my $arrayref (@content) {
+        my $column = 0;
+        @insert_array = ();
+        foreach my $element (@$arrayref) {
+            if (defined($element)) {
+                if ($element =~ /$delimiter/) {
+                    my $test = $element;
+                    my @split_array = split($delimiter, $test);
+
+                    $element = $split_array[0]; 
+                    $insert_array[$column] = $split_array[1];
+
+                }
+
+                if ($column == $maxcol-1 && @insert_array) {
+                    my @insert = @insert_array;
+                    splice @content, $row_num, 0, \@insert;
+                }
+                $column +=1;
+            }
+        }
+        $row_num += 1;
+    }
+
+
+    for my $i (0..$#content) {
+        for my $j (0..$#{$content[$i]}) {
+            if (defined($content[$i][$j])) {
+                print "$content[$i][$j] ";
+            } else {
+                print "  ";
+            }
+        }
+        print "\n";
+    }
 }
 
 =head1 AUTHOR
