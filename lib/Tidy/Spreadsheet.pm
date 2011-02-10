@@ -5,7 +5,8 @@ use strict;
 use Spreadsheet::Read;
 use Spreadsheet::SimpleExcel;
 use Carp qw( croak );
-my $spreadsheet = "";
+use constant NOT_PROVIDED   => -1;
+my $spreadsheet = q{};
 
 =head1 NAME
 
@@ -46,7 +47,7 @@ example; Tidy::Spreadsheet->load_spreadsheet("spreadsheet.csv", ",");
 
 sub new {
     my $package = shift;
-    return bless( {}, $package );
+    return bless {}, $package;
 }
 
 sub load_spreadsheet {
@@ -56,16 +57,16 @@ sub load_spreadsheet {
     my ( $self, $file_name, $delimiter ) = @_;
 
     if ( $file_name =~ /.csv$/ ) {
-        if ( defined($delimiter) ) {
+        if ( defined $delimiter ) {
             $spreadsheet = ReadData( $file_name, sep => $delimiter );
             return 0;
         }
         else {
-            croak "Error; no delimiter supplied for csv file";
+            return 1;
         }
     }
     elsif ( $file_name =~ /.xls$/ ) {
-        $spreadsheet = ReadData( $file_name, parser => "xls" );
+        $spreadsheet = ReadData( $file_name, parser => q{xls} );
         return 0;
     }
     else {
@@ -90,7 +91,8 @@ sub save_contents {
     $excel->add_worksheet( 'Sheet 1',
         { -headers => $header, -data => $content } );
 
-    $excel->output_to_file($filename) or die $excel->errstr();
+    $excel->output_to_file($filename) or croak $excel->errstr();
+    return 0;
 }
 
 =head2 get_row_contents(row number, sheetnumber) 
@@ -103,11 +105,11 @@ Further explination on sheetnumber, its the current spreadsheet tab number you a
 
 sub get_row_contents {
     my ( $self, $row_num, $sheet_num ) = @_;
-    $sheet_num = 1 unless defined($sheet_num);
+    $sheet_num = 1 unless defined $sheet_num;
 
     my @get_row =
       Spreadsheet::Read::row( $spreadsheet->[$sheet_num], $row_num );
-    my $return_value = "$row_num:" . join ( ":", @get_row );
+    my $return_value = "$row_num:" . join q{:}, @get_row;
     return $return_value;
 }
 
@@ -126,31 +128,22 @@ sub row_contains {
     my $maxsheet      = $spreadsheet->[0]{sheets};
     my $maxrow        = 0;
     my $maxcol        = 0;
-    my $cell          = "";
+    my $cell          = q{ };
 
     for ( my $sheet = 1 ; $sheet <= $maxsheet ; $sheet++ ) {
         $maxrow = $spreadsheet->[$sheet]{maxrow};
         $maxcol = $spreadsheet->[$sheet]{maxcol};
-
         for ( my $row = 2 ; $row <= $maxrow ; $row++ ) {
             for ( my $col = 1 ; $col <= $maxcol ; $col++ ) {
                 $cell = $spreadsheet->[$sheet]{ cr2cell( $col, $row ) };
                 if ( $cell =~ /$pattern/ ) {
                     $results_array[$total_results] =
                       $self->get_row_contents($row);
-                    print "Match found @ "
-                      . cr2cell( $col, $row )
-                      . " on sheet $sheet\n";
                     $total_results += 1;
                 }
-
-                #print $cell, " ";
             }
         }
     }
-
-    print "\nRows found;\n";
-    print "@results_array\n";
     return @results_array;
 }
 
@@ -163,7 +156,7 @@ Returns array of headers.
 sub get_headers {
     my ($self) = @_;
 
-    my @return_array = split ( ":", $self->get_row_contents(1) );
+    my @return_array = split q{:}, $self->get_row_contents(1);
     shift @return_array;
     return @return_array;
 }
@@ -177,20 +170,20 @@ sub get_headers {
 sub get_contents {
 
     my ( $self, $sheet ) = @_;
-    $sheet = 1 unless defined($sheet);
+    $sheet = 1 unless defined $sheet;
 
     my $maxrow = $spreadsheet->[$sheet]{maxrow};
     my $maxcol = $spreadsheet->[$sheet]{maxcol};
-    my $cell   = "";
+    my $cell  = q{ };
     my @return_contents;
 
     for ( my $row = 2 ; $row <= $maxrow ; $row++ ) {
         my @row_contents;
         for ( my $col = 1 ; $col <= $maxcol ; $col++ ) {
             $cell = $spreadsheet->[$sheet]{ cr2cell( $col, $row ) };
-            push ( @row_contents, $cell );
+            push @row_contents, $cell;
         }
-        push ( @return_contents, \@row_contents );
+        push @return_contents, \@row_contents;
     }
 
     return @return_contents;
@@ -207,9 +200,9 @@ sub prepare_to_insert {
 
     my ( $self, $column, $split_array, $insert_array ) = @_;
 
-    for ( my $s = 1 ; $s < scalar(@$split_array) ; $s++ ) {
+    for ( my $s = 1 ; $s < scalar @{$split_array} ; $s++ ) {
         my @tmp_array = ();
-        if ( scalar(@$split_array) >= 2 ) {
+        if ( scalar(@{$split_array}) >= 2 ) {
             @tmp_array = $split_array->[$s];
         }
         else {
@@ -217,19 +210,19 @@ sub prepare_to_insert {
         }
 
         my @tmp_insert = ();
-        for ( my $i = 0 ; $i <= $column ; $i++ ) {
-            if ( $i != $column ) {
-                $tmp_insert[$i] = " ";
+        for ( 0..$column ) {
+            if ( $_ != $column ) {
+                $tmp_insert[$_] = q{ };
             }
             else {
-                $tmp_insert[$i] = $tmp_array[0];
+                $tmp_insert[$_] = $tmp_array[0];
             }
         }
         if (@tmp_insert) {
             @{ $insert_array->[$column][$s] } = @tmp_insert;
         }
     }
-
+    return;
 }
 
 =head2 row_split(row, delimiter(s), optional column) 
@@ -240,7 +233,7 @@ Splits a row into multiple rows, depending on how many are found. Can specify a 
 
 sub row_split {
     my ( $self, $row, $delimiter, $col ) = @_;
-    $col = -1 unless defined($col);
+    $col = NOT_PROVIDED unless defined $col;
 
     my @content = $self->get_contents();
 
@@ -254,11 +247,11 @@ sub row_split {
         foreach my $element (@$arrayref) {
 
             # Check field has a value and it matches.
-            if ( defined($element) ) {
+            if ( defined $element ) {
                 if ( $element =~ /$delimiter/ && $element ne $delimiter ) {
                     my $tmp = $element;
-                    my @split_array = split ( $delimiter, $tmp );
-                    if ( $col == -1 ) {
+                    my @split_array = split $delimiter, $tmp;
+                    if ( $col == NOT_PROVIDED ) {
 
                         #Overwrite our old value/set new intoarray
                         $element = $split_array[0];
@@ -278,19 +271,16 @@ sub row_split {
                 if ( $column == $maxcol - 1 && @insert_array ) {
                     foreach my $colref (@insert_array) {
                         foreach my $arr (@$colref) {
-                            if ( defined($arr) ) {
+                            if ( defined $arr ) {
                                 splice @content, $row_num, 0, $arr;
                             }
                         }
                     }
-
                 }
-
                 #Inc current column
                 $column += 1;
             }
         }
-
         #Inc current row
         $row_num += 1;
     }
