@@ -201,6 +201,41 @@ sub get_contents {
 }
 
 
+=head2 prepare_to_insert(@splitarray, @array to prepare into) 
+
+Prepares the array for inserting back into the excel file.
+
+=cut
+
+sub prepare_to_insert {
+
+    my ($self, $column, $split_array, $insert_array) = @_;
+
+    for(my $s=1; $s < scalar(@$split_array); $s++) {
+        my @tmp_array = ();                  
+        if (scalar(@$split_array) >= 2) {
+            @tmp_array = $split_array->[$s];
+        } else {
+            $tmp_array[0] = $split_array->[1];
+        }
+
+        my @tmp_insert = ();
+        for(my $i = 0;$i <= $column; $i++) {
+            if ($i != $column) {
+                $tmp_insert[$i]= " ";
+            }
+            else {
+                $tmp_insert[$i]=$tmp_array[0];
+            } 
+        }
+        if (@tmp_insert) {
+            @{$insert_array->[$column][$s]}=@tmp_insert;
+        }
+    }
+
+}
+
+
 =head2 row_split(row, delimiter(s), optional column) 
 
 Splits a row into multiple rows, depending on how many are found. Can specify a specific column where the row should split, if left blank will search through every column and split all possible matches. To match based on a search string, and not specifying the row number see row_splitmatch.
@@ -226,40 +261,18 @@ sub row_split {
                 if ($element =~ /$delimiter/ && $element ne $delimiter) {
                     my $tmp = $element;
                     my @split_array = split($delimiter, $tmp);
-
                     if ($col == -1) {
-
                         #Overwrite our old value/set new intoarray
                         $element = $split_array[0];
-                        for(my $s=1; $s <= $#split_array; $s++) {
-                            my @tmp_array = ();                  
-                            if ($#split_array >= 2) {
-                                @tmp_array = $split_array[$s];
-                            } else {
-                                $tmp_array[0] = $split_array[1];
-                            }
-                            my @tmp_insert = ();
-                            for(my $l = 0;$l <= $column; $l++) {
-
-                                if ($l != $column) {
-                                    $tmp_insert[$l]= " ";
-                                }
-                                else {
-                                    $tmp_insert[$l]=$tmp_array[0];
-                                } 
-                            }
-                            if (@tmp_insert) {
-                                @{$insert_array[$column][$s]}=@tmp_insert;
-                            }
-                        }
+                        $self->prepare_to_insert($column, \@split_array, \@insert_array);
                     }
                     elsif ($col == $column) {
                         # Do the same but only on specified column    
                         $element = $split_array[0];
-                        $insert_array[$column] = $split_array[1];
+                        $self->prepare_to_insert($column, \@split_array, \@insert_array);
                     }
                 }
-                # Splice required fields into content
+# Splice required fields into content
                 if ($column == $maxcol-1 && @insert_array) {
                     foreach my $colref (@insert_array) {
                         foreach my $arr (@$colref) {
