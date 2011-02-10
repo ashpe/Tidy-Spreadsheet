@@ -2,10 +2,11 @@ package Tidy::Spreadsheet;
 
 use warnings;
 use strict;
+use Readonly;
 use Spreadsheet::Read;
 use Spreadsheet::SimpleExcel;
 use Carp qw( croak );
-use constant NOT_PROVIDED   => -1;
+Readonly my $NOT_PROVIDED => -1;
 my $spreadsheet = q{};
 
 =head1 NAME
@@ -233,7 +234,7 @@ Splits a row into multiple rows, depending on how many are found. Can specify a 
 
 sub row_split {
     my ( $self, $row, $delimiter, $col ) = @_;
-    $col = NOT_PROVIDED unless defined $col;
+    $col = $NOT_PROVIDED unless defined $col;
 
     my @content = $self->get_contents();
 
@@ -251,7 +252,7 @@ sub row_split {
                 if ( $element =~ /$delimiter/ && $element ne $delimiter ) {
                     my $tmp = $element;
                     my @split_array = split $delimiter, $tmp;
-                    if ( $col == NOT_PROVIDED ) {
+                    if ( $col == $NOT_PROVIDED ) {
 
                         #Overwrite our old value/set new intoarray
                         $element = $split_array[0];
