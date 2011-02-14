@@ -289,6 +289,49 @@ sub row_split {
     return @content;
 }
 
+=head2 add_columns_to(at_column, amount of new columns, data to add to, headers reference)
+
+Used with col split to add blank columns into our content. Requires
+reference to our headers so all new data will be aligned.
+
+=cut
+
+sub add_columns_to {
+
+    my ($self, $column, $new_columns, $content, $headers_arr) = @_;
+    
+    foreach my $row (@{$content}) {
+        for my $i (0..$new_columns-1) {
+            splice @{$row}, $column+$i, 0, ' ';
+        }
+    }
+
+    for my $j (0..$new_columns-1) {
+        splice @{$headers_arr}, $column+$j, 0, ' ';
+    }
+
+}
+
+=head2 col_split(column, delimiter, number_of_new_columns, ref headers)
+
+Splits a value in one column, into multiple columns based on the delimiter. Requires a reference to our headers array, so we can alter them based on new columns.
+
+=cut
+
+sub col_split {
+
+    my ($self, $column, $delimiter, $new_columns, $headers_arr) = @_;
+
+    my @content = $self->get_contents();
+    
+    print "$content[0]->[$column-1]\n";
+    
+    $self->add_columns_to($column, $new_columns, \@content, $headers_arr);
+
+    return @content;
+    
+}
+
 =head1 AUTHOR
 
 Ashley Pope, C<< <ashleyp at cpan.org> >>
