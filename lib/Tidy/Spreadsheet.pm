@@ -126,10 +126,10 @@ sub row_contains {
 
     my @results_array;
     my $total_results = 0;
-    my $maxsheet      = $self->{spreadsheet}->[0]{sheets};
+    my $num_sheets    = @{$self->{spreadsheet}} - 1;
     my $cell          = ' ';
 
-    for my $sheet ( 1 .. $maxsheet ) {
+    for my $sheet ( 1 .. $num_sheets ) {
         my $maxrow = $self->{spreadsheet}->[$sheet]{maxrow};
         my $maxcol = $self->{spreadsheet}->[$sheet]{maxcol};
         for my $row ( 2 .. $maxrow ) {
