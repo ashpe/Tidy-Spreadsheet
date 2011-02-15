@@ -15,18 +15,9 @@ my @contents = $spreadsheet->get_contents();
 
 print "@headers_array\n";
 
+my @edited_contents = $spreadsheet->col_split(1, ",", 3, \@headers_array);
 
-my @edited_contents = $spreadsheet->row_split(2, ",");
-
-#for my $i (0..$#contents) {
-#    for my $j (0..$#{$contents[$i]}) {
-#        if (defined($contents[$i][$j])) {
-#            print "$contents[$i][$j] ";
-#        }
-#    }
-#    print "\n";
-#}
-
+#my @edited_contents = $spreadsheet->row_split(2, ",");
 
 $spreadsheet->save_contents("test_split.xls", \@headers_array, \@edited_contents);
 
