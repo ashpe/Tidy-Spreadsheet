@@ -92,7 +92,8 @@ sub save_contents {
         { -headers => $header, -data => $content } );
 
     $excel->output_to_file($filename) or croak $excel->errstr();
-    return 0;
+    
+    return 1;
 }
 
 =head2 get_row_contents(row number, sheetnumber) 
@@ -126,13 +127,11 @@ sub row_contains {
     my @results_array;
     my $total_results = 0;
     my $maxsheet      = $self->{spreadsheet}->[0]{sheets};
-    my $maxrow        = 0;
-    my $maxcol        = 0;
     my $cell          = ' ';
 
     for my $sheet ( 1 .. $maxsheet ) {
-        $maxrow = $self->{spreadsheet}->[$sheet]{maxrow};
-        $maxcol = $self->{spreadsheet}->[$sheet]{maxcol};
+        my $maxrow = $self->{spreadsheet}->[$sheet]{maxrow};
+        my $maxcol = $self->{spreadsheet}->[$sheet]{maxcol};
         for my $row ( 2 .. $maxrow ) {
             for my $col ( 1 .. $maxcol ) {
                 $cell = $self->{spreadsheet}->[$sheet]{ cr2cell( $col, $row ) };
