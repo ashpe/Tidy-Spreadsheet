@@ -15,6 +15,9 @@ my @contents = $spreadsheet->get_contents();
 
 print "@headers_array\n";
 
+#my $row_one = $spreadsheet->get_row_contents(1);
+#my @search_results = $spreadsheet->row_contains('1');
+
 my @edited_contents = $spreadsheet->col_split(1, ",", 3, \@headers_array);
 
 #my @edited_contents = $spreadsheet->row_split(2, ",");
