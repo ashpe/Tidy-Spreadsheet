@@ -7,7 +7,7 @@ use Spreadsheet::Read;
 use Spreadsheet::SimpleExcel;
 use Carp qw( croak );
 Readonly my $NOT_PROVIDED => -1;
-my $spreadsheet = q{};
+my $spreadsheet = '';
 
 =head1 NAME
 
@@ -67,7 +67,7 @@ sub load_spreadsheet {
         }
     }
     elsif ( $file_name =~ /.xls$/ ) {
-        $spreadsheet = ReadData( $file_name, parser => q{xls} );
+        $spreadsheet = ReadData( $file_name, parser => 'xls' );
         return 0;
     }
     else {
@@ -110,7 +110,7 @@ sub get_row_contents {
 
     my @get_row =
       Spreadsheet::Read::row( $spreadsheet->[$sheet_num], $row_num );
-    my $return_value = "$row_num:" . join q{:}, @get_row;
+    my $return_value = "$row_num:" . join ':', @get_row;
     return $return_value;
 }
 
@@ -129,13 +129,13 @@ sub row_contains {
     my $maxsheet      = $spreadsheet->[0]{sheets};
     my $maxrow        = 0;
     my $maxcol        = 0;
-    my $cell          = q{ };
+    my $cell          = ' ';
 
-    for my $sheet (  1..$maxsheet ) {
+    for my $sheet ( 1 .. $maxsheet ) {
         $maxrow = $spreadsheet->[$sheet]{maxrow};
         $maxcol = $spreadsheet->[$sheet]{maxcol};
-        for my $row ( 2..$maxrow ) {
-            for my $col ( 1..$maxcol ) {
+        for my $row ( 2 .. $maxrow ) {
+            for my $col ( 1 .. $maxcol ) {
                 $cell = $spreadsheet->[$sheet]{ cr2cell( $col, $row ) };
                 if ( $cell =~ /$pattern/ ) {
                     $results_array[$total_results] =
@@ -157,7 +157,7 @@ Returns array of headers.
 sub get_headers {
     my ($self) = @_;
 
-    my @return_array = split q{:}, $self->get_row_contents(1);
+    my @return_array = split ':', $self->get_row_contents(1);
     shift @return_array;
     return @return_array;
 }
@@ -175,12 +175,12 @@ sub get_contents {
 
     my $maxrow = $spreadsheet->[$sheet]{maxrow};
     my $maxcol = $spreadsheet->[$sheet]{maxcol};
-    my $cell  = q{ };
+    my $cell   = ' ';
     my @return_contents;
 
-    for my $row ( 2..$maxrow ) {
+    for my $row ( 2 .. $maxrow ) {
         my @row_contents;
-        for my $col ( 1..$maxcol ) {
+        for my $col ( 1 .. $maxcol ) {
             $cell = $spreadsheet->[$sheet]{ cr2cell( $col, $row ) };
             push @row_contents, $cell;
         }
@@ -203,7 +203,7 @@ sub prepare_to_insert {
 
     for ( my $s = 1 ; $s < scalar @{$split_array} ; $s++ ) {
         my @tmp_array = ();
-        if ( scalar(@{$split_array}) >= 2 ) {
+        if ( scalar( @{$split_array} ) >= 2 ) {
             @tmp_array = $split_array->[$s];
         }
         else {
@@ -211,9 +211,9 @@ sub prepare_to_insert {
         }
 
         my @tmp_insert = ();
-        for ( 0..$column ) {
+        for ( 0 .. $column ) {
             if ( $_ != $column ) {
-                $tmp_insert[$_] = q{ };
+                $tmp_insert[$_] = ' ';
             }
             else {
                 $tmp_insert[$_] = $tmp_array[0];
@@ -278,10 +278,12 @@ sub row_split {
                         }
                     }
                 }
+
                 #Inc current column
                 $column += 1;
             }
         }
+
         #Inc current row
         $row_num += 1;
     }
@@ -298,23 +300,25 @@ reference to our headers so all new data will be aligned.
 
 sub add_columns_to {
 
-    my ($self, $column, $new_columns, $content, $headers_arr) = @_;
-    
-    foreach my $row (@{$content}) {
-        for my $i (0..$new_columns-1) {
-            if (!$row->[$column+$i]) {
-                $row->[$column+$i] = ' ';
-            } else {
-                splice @{$row}, $column+$i, 0, ' ';
+    my ( $self, $column, $new_columns, $content, $headers_arr ) = @_;
+
+    foreach my $row ( @{$content} ) {
+        for my $i ( 0 .. $new_columns - 1 ) {
+            if ( !$row->[ $column + $i ] ) {
+                $row->[ $column + $i ] = ' ';
+            }
+            else {
+                splice @{$row}, $column + $i, 0, ' ';
             }
         }
     }
 
-    for my $j (0..$new_columns-1) {
-        if (!$headers_arr->[$column+$j]) {
-            $headers_arr->[$column+$j] = ' ';
-        } else {
-            splice @{$headers_arr}, $column+$j, 0, ' ';
+    for my $j ( 0 .. $new_columns - 1 ) {
+        if ( !$headers_arr->[ $column + $j ] ) {
+            $headers_arr->[ $column + $j ] = ' ';
+        }
+        else {
+            splice @{$headers_arr}, $column + $j, 0, ' ';
         }
     }
 
@@ -327,23 +331,23 @@ Returns the data from $column, split into the required fields for adding
 =cut
 
 sub get_new_columns {
-    
-    my ($self, $content, $column, $new_column, $delimiter) = @_;
-    my $row_content = q{};
-    my $content_size = @{$content}-1;
-    my @arr_to_add = qw{};
 
-    foreach my $row (0..$content_size) {
-            $row_content = $content->[$row]->[$column-1];
-            if ($row_content =~ /$delimiter/ && defined($row_content)) {
-                my @split_arr = split $delimiter, $row_content;
-                my $split_arr_size = @split_arr - 1;
-                
-                for my $i(0..$split_arr_size) {
-                    $arr_to_add[$i][$row] = $split_arr[$i];
-                }
-                
+    my ( $self, $content, $column, $new_column, $delimiter ) = @_;
+    my $row_content  = '';
+    my $content_size = @{$content} - 1;
+    my @arr_to_add   = qw{};
+
+    foreach my $row ( 0 .. $content_size ) {
+        $row_content = $content->[$row]->[ $column - 1 ];
+        if ( $row_content =~ /$delimiter/ && defined($row_content) ) {
+            my @split_arr      = split $delimiter, $row_content;
+            my $split_arr_size = @split_arr - 1;
+
+            for my $i ( 0 .. $split_arr_size ) {
+                $arr_to_add[$i][$row] = $split_arr[$i];
             }
+
+        }
     }
 
     return @arr_to_add;
@@ -357,25 +361,24 @@ Splits a value in one column, into multiple columns based on the delimiter. Requ
 
 sub col_split {
 
-    my ($self, $column, $delimiter, $new_columns, $headers_arr) = @_;
-    my @content = $self->get_contents();
-    my @add_content = $self->get_new_columns(\@content, $column, 
-                                            $new_columns, $delimiter);
-    
-    $self->add_columns_to($column, $new_columns, \@content, $headers_arr);
-   
-    
-    for my $i (0..@add_content-1) {
-        for my $j (0..@{$add_content[$i]}-1) {
-            if (defined($add_content[$i][$j])) {
-                my $real_column = ($column-1)+$i; 
+    my ( $self, $column, $delimiter, $new_columns, $headers_arr ) = @_;
+    my @content     = $self->get_contents();
+    my @add_content =
+      $self->get_new_columns( \@content, $column, $new_columns, $delimiter );
+
+    $self->add_columns_to( $column, $new_columns, \@content, $headers_arr );
+
+    for my $i ( 0 .. @add_content - 1 ) {
+        for my $j ( 0 .. @{ $add_content[$i] } - 1 ) {
+            if ( defined( $add_content[$i][$j] ) ) {
+                my $real_column = ( $column - 1 ) + $i;
                 $content[$j][$real_column] = $add_content[$i][$j];
-            }   
+            }
         }
     }
 
     return @content;
-    
+
 }
 
 =head1 AUTHOR
