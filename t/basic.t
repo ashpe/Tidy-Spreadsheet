@@ -28,11 +28,12 @@ is_deeply \@split_column,
           "col_split()"
    or diag explain \@split_column;
 
+
 my @split_row = $spreadsheet->row_split(2, ",");
 is_deeply \@split_row, 
           [['Steve'],['Dave'],['John'],['Ashley']], 
           "row_split" 
-    or diag explain \@split_row;
+   or diag explain \@split_row;
 
 my $edited_file = "t/data/test_split.xls";
 ok $spreadsheet->save_contents(
