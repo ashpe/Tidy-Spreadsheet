@@ -3,17 +3,23 @@
 use strict;
 use warnings;
 use Tidy::Spreadsheet;
+use Test::More;
 
-#my $csv_file = "t/test.csv";
 
 my $spreadsheet = Tidy::Spreadsheet->new();
 
-$spreadsheet->load_spreadsheet($ARGV[0]);
+ok $spreadsheet->load_spreadsheet("t/data/names.xls");
+
 
 my @headers_array = $spreadsheet->get_headers();
-my @contents = $spreadsheet->get_contents();
+is_deeply \@headers_array, ['Names'];
 
-print "@headers_array\n";
+my @contents = $spreadsheet->get_contents();
+is_deeply \@contents, [["Ashley,John,Dave,Steve"]] or diag explain \@contents;
+
+done_testing;
+
+__END__
 
 #my $row_one = $spreadsheet->get_row_contents(1);
 #my @search_results = $spreadsheet->row_contains('1');

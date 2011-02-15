@@ -7,7 +7,6 @@ use Spreadsheet::Read;
 use Spreadsheet::SimpleExcel;
 use Carp qw( croak );
 Readonly my $NOT_PROVIDED => -1;
-my $spreadsheet = '';
 
 =head1 NAME
 
@@ -59,20 +58,20 @@ sub load_spreadsheet {
 
     if ( $file_name =~ /.csv$/ ) {
         if ( defined $delimiter ) {
-            $spreadsheet = ReadData( $file_name, sep => $delimiter );
-            return 0;
+            $self->{spreadsheet} = ReadData( $file_name, sep => $delimiter );
+            return 1;
         }
         else {
-            return 1;
+            return 0;
         }
     }
     elsif ( $file_name =~ /.xls$/ ) {
-        $spreadsheet = ReadData( $file_name, parser => 'xls' );
-        return 0;
+        $self->{spreadsheet} = ReadData( $file_name, parser => 'xls' );
+        return 1;
     }
     else {
-        $spreadsheet = ReadData($file_name);
-        return 0;
+        $self->{spreadsheet} = ReadData($file_name);
+        return 1;
     }
 
 }
@@ -109,7 +108,7 @@ sub get_row_contents {
     $sheet_num = 1 unless defined $sheet_num;
 
     my @get_row =
-      Spreadsheet::Read::row( $spreadsheet->[$sheet_num], $row_num );
+      Spreadsheet::Read::row( $self->{spreadsheet}->[$sheet_num], $row_num );
     my $return_value = "$row_num:" . join ':', @get_row;
     return $return_value;
 }
@@ -126,17 +125,17 @@ sub row_contains {
 
     my @results_array;
     my $total_results = 0;
-    my $maxsheet      = $spreadsheet->[0]{sheets};
+    my $maxsheet      = $self->{spreadsheet}->[0]{sheets};
     my $maxrow        = 0;
     my $maxcol        = 0;
     my $cell          = ' ';
 
     for my $sheet ( 1 .. $maxsheet ) {
-        $maxrow = $spreadsheet->[$sheet]{maxrow};
-        $maxcol = $spreadsheet->[$sheet]{maxcol};
+        $maxrow = $self->{spreadsheet}->[$sheet]{maxrow};
+        $maxcol = $self->{spreadsheet}->[$sheet]{maxcol};
         for my $row ( 2 .. $maxrow ) {
             for my $col ( 1 .. $maxcol ) {
-                $cell = $spreadsheet->[$sheet]{ cr2cell( $col, $row ) };
+                $cell = $self->{spreadsheet}->[$sheet]{ cr2cell( $col, $row ) };
                 if ( $cell =~ /$pattern/ ) {
                     $results_array[$total_results] =
                       $self->get_row_contents($row);
@@ -173,15 +172,15 @@ sub get_contents {
     my ( $self, $sheet ) = @_;
     $sheet = 1 unless defined $sheet;
 
-    my $maxrow = $spreadsheet->[$sheet]{maxrow};
-    my $maxcol = $spreadsheet->[$sheet]{maxcol};
+    my $maxrow = $self->{spreadsheet}->[$sheet]{maxrow};
+    my $maxcol = $self->{spreadsheet}->[$sheet]{maxcol};
     my $cell   = ' ';
     my @return_contents;
 
     for my $row ( 2 .. $maxrow ) {
         my @row_contents;
         for my $col ( 1 .. $maxcol ) {
-            $cell = $spreadsheet->[$sheet]{ cr2cell( $col, $row ) };
+            $cell = $self->{spreadsheet}->[$sheet]{ cr2cell( $col, $row ) };
             push @row_contents, $cell;
         }
         push @return_contents, \@row_contents;
@@ -240,7 +239,7 @@ sub row_split {
 
     my @insert_array = ();
     my $row_num      = 0;
-    my $maxcol       = $spreadsheet->[1]{maxcol};
+    my $maxcol       = $self->{spreadsheet}->[1]{maxcol};
 
     foreach my $arrayref (@content) {
         my $column = 0;
