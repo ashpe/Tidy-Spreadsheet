@@ -5,6 +5,7 @@ use warnings;
 use Tidy::Spreadsheet;
 use Test::More;
 
+
 my $spreadsheet = Tidy::Spreadsheet->new();
 ok $spreadsheet->load_spreadsheet("t/data/names.xls");
 
@@ -28,6 +29,7 @@ my @split_row = $spreadsheet->row_split(2, ",");
 is_deeply \@split_row, [['Steve'],['Dave'],['John'],['Ashley']] 
     or diag explain \@split_row;
 
-ok $spreadsheet->save_contents("t/data/test_split.xls", \@headers_array, \@split_column);
-
+my $edited_file = "t/data/test_split.xls";
+ok $spreadsheet->save_contents($edited_file, \@headers_array, \@split_column);
+END { unlink $edited_file; }
 done_testing;
