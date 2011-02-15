@@ -302,14 +302,51 @@ sub add_columns_to {
     
     foreach my $row (@{$content}) {
         for my $i (0..$new_columns-1) {
-            splice @{$row}, $column+$i, 0, ' ';
+            if (!$row->[$column+$i]) {
+                $row->[$column+$i] = ' ';
+            } else {
+                splice @{$row}, $column+$i, 0, ' ';
+            }
         }
     }
 
     for my $j (0..$new_columns-1) {
-        splice @{$headers_arr}, $column+$j, 0, ' ';
+        if (!$headers_arr->[$column+$j]) {
+            $headers_arr->[$column+$j] = ' ';
+        } else {
+            splice @{$headers_arr}, $column+$j, 0, ' ';
+        }
     }
 
+}
+
+=head2 get_new_columns( @ content , $column, $new column)
+
+Returns the data from $column, split into the required fields for adding
+
+=cut
+
+sub get_new_columns {
+    
+    my ($self, $content, $column, $new_column, $delimiter) = @_;
+    my $row_content = q{};
+    my $content_size = @{$content}-1;
+    my @arr_to_add = qw{};
+
+    foreach my $row (0..$content_size) {
+            $row_content = $content->[$row]->[$column-1];
+            if ($row_content =~ /$delimiter/ && defined($row_content)) {
+                my @split_arr = split $delimiter, $row_content;
+                my $split_arr_size = @split_arr - 1;
+                
+                for my $i(0..$split_arr_size) {
+                    $arr_to_add[$i][$row] = $split_arr[$i];
+                }
+                
+            }
+    }
+
+    return @arr_to_add;
 }
 
 =head2 col_split(column, delimiter, number_of_new_columns, ref headers)
@@ -321,12 +358,21 @@ Splits a value in one column, into multiple columns based on the delimiter. Requ
 sub col_split {
 
     my ($self, $column, $delimiter, $new_columns, $headers_arr) = @_;
-
     my @content = $self->get_contents();
-    
-    print "$content[0]->[$column-1]\n";
+    my @add_content = $self->get_new_columns(\@content, $column, 
+                                            $new_columns, $delimiter);
     
     $self->add_columns_to($column, $new_columns, \@content, $headers_arr);
+   
+    
+    for my $i (0..@add_content-1) {
+        for my $j (0..@{$add_content[$i]}-1) {
+            if (defined($add_content[$i][$j])) {
+                my $real_column = ($column-1)+$i; 
+                $content[$j][$real_column] = $add_content[$i][$j];
+            }   
+        }
+    }
 
     return @content;
     
@@ -341,9 +387,6 @@ Ashley Pope, C<< <ashleyp at cpan.org> >>
 Please report any bugs or feature requests to C<bug-tidy-spreadsheet at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Tidy-Spreadsheet>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
-
-
 
 =head1 SUPPORT
 
