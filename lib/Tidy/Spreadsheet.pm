@@ -82,6 +82,8 @@ Saves file. Overwrites old file if required.
 sub save_contents {
 
     my ( $self, $filename, $header, $content ) = @_;
+    
+    #TODO: Add save to CSV file as it doesn't currently work. if (csv) {} else {}
 
     my $excel = Spreadsheet::SimpleExcel->new();
 
