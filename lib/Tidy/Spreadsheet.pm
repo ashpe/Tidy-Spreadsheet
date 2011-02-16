@@ -228,9 +228,7 @@ sub add_insert_array {
     if ( $column == $self->maxcol - 1 && @{$insert_array} ) {
         foreach my $colref ( @{$insert_array} ) {
             foreach my $arr (@$colref) {
-                if ( defined $arr ) {
-                    splice @{$content_array}, $row_num, 0, $arr;
-                }
+                splice @{$content_array}, $row_num, 0, $arr unless !defined($arr);
             }
         }
     }
@@ -371,7 +369,7 @@ sub col_split {
 
     for my $i ( 0 .. @add_content - 1 ) {
         for my $j ( 0 .. @{ $add_content[$i] } - 1 ) {
-            if ( defined( $add_content[$i][$j] ) ) {
+            if ( defined $add_content[$i][$j]  ) {
                 my $real_column = ( $column - 1 ) + $i;
                 $content[$j][$real_column] = $add_content[$i][$j];
             }
@@ -382,8 +380,4 @@ sub col_split {
 
 }
 
-=head1 AUTHOR
-
-Ashley Pope
-
-1;    # End of Tidy::Spreadsheet
+1; #End!
