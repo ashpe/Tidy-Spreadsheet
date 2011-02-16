@@ -1,10 +1,8 @@
 package Tidy::Spreadsheet;
 
-use warnings;
-use strict;
+use Modern::Perl;
 use Moose;
 use Readonly;
-use Modern::Perl;
 use Spreadsheet::Read;
 use Spreadsheet::SimpleExcel;
 use Carp qw( croak );
