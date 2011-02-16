@@ -50,8 +50,6 @@ example; Tidy::Spreadsheet->load_spreadsheet("spreadsheet.csv", ",");
 
 sub load_spreadsheet {
 
-    #TODO: Add error checking once spreadsheet is loaded
-    #TODO: Check if it's blank etc.
     my ( $self, $file_name, $delimiter ) = @_;
 
     if ( $file_name =~ /.csv$/ ) {
@@ -64,7 +62,7 @@ sub load_spreadsheet {
         }
     }
     elsif ( $file_name =~ /.xls$/ ) {
-        $self->spreadsheet( ReadData( $file_name, parser => 'xls') );    
+        $self->spreadsheet( ReadData( $file_name, parser => 'xls' ) );
         return 1;
     }
     else {
@@ -85,20 +83,18 @@ sub save_contents {
     my ( $self, $filename, $header, $content ) = @_;
 
     my $excel = Spreadsheet::SimpleExcel->new();
-
+    print keys $self->spreadsheet{sheet};
     $excel->add_worksheet( 'Sheet 1',
         { -headers => $header, -data => $content } );
 
     $excel->output_to_file($filename) or croak $excel->errstr();
-    
+
     return 1;
 }
 
 =head2 get_row_contents(row number, sheetnumber) 
 
 Sheetnumber is optional, will default to the first spreadsheet if not set, row number is the row number!
-
-Further explination on sheetnumber, its the current spreadsheet tab number you are viewing starting at 1.
 
 =cut 
 
@@ -124,7 +120,7 @@ sub row_contains {
 
     my @results_array;
     my $total_results = 0;
-    my $num_sheets    = @{$self->spreadsheet} - 1;
+    my $num_sheets    = @{ $self->spreadsheet } - 1;
     my $cell          = ' ';
 
     for my $sheet ( 1 .. $num_sheets ) {
@@ -134,8 +130,8 @@ sub row_contains {
             for my $col ( 1 .. $maxcol ) {
                 $cell = $self->spreadsheet->[$sheet]{ cr2cell( $col, $row ) };
                 if ( $cell =~ /$pattern/ ) {
-                   push @results_array, $self->get_row_contents($row);
-                   last;
+                    push @results_array, $self->get_row_contents($row);
+                    last;
                 }
             }
         }
@@ -172,7 +168,7 @@ sub get_contents {
     my $maxrow = $self->spreadsheet->[$sheet]{maxrow};
     for my $row ( 2 .. $maxrow ) {
         my @row_contents;
-        my $maxcol = $self->spreadsheet->[$sheet]{maxcol}; 
+        my $maxcol = $self->spreadsheet->[$sheet]{maxcol};
         for my $col ( 1 .. $maxcol ) {
             my $cell = $self->spreadsheet->[$sheet]{ cr2cell( $col, $row ) };
             push @row_contents, $cell;
@@ -194,7 +190,7 @@ sub prepare_to_insert {
 
     my ( $self, $column, $split_array, $insert_array ) = @_;
 
-    for my $s ( 1 .. @{$split_array}-1 ) {
+    for my $s ( 1 .. @{$split_array} - 1 ) {
         my @tmp_array = ();
         if ( scalar( @{$split_array} ) > 2 ) {
             @tmp_array = $split_array->[$s];
