@@ -85,14 +85,26 @@ sub save_contents {
     
     #TODO: Add save to CSV file as it doesn't currently work. if (csv) {} else {}
 
-    my $excel = Spreadsheet::SimpleExcel->new();
+    if ($filename =~ /.csv$/) {
+	unshift @{$content}, $header;
+	my $temp = join "\n", map { $_ = join ",", @{$_} } @{$content};
+	
+	open FH, ">", $filename or die $!;
+	print FH $temp;
+	close FH;
+	return 1;
+    } 
+    else {
+	my $excel = Spreadsheet::SimpleExcel->new();
 
-    $excel->add_worksheet( 'Sheet 1',
-        { -headers => $header, -data => $content } );
+	$excel->add_worksheet( 'Sheet 1',
+		{ -headers => $header, -data => $content } );
 
-    $excel->output_to_file($filename) or croak $excel->errstr();
+		
+	$excel->output_to_file($filename) or croak $excel->errstr();
 
-    return 1;
+	return 1;
+    }
 }
 
 =head2 get_row_contents(row number, sheetnumber) 
