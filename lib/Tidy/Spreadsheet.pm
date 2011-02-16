@@ -10,6 +10,8 @@ use Carp qw( croak );
 Readonly my $NOT_PROVIDED => -1;
 
 has 'spreadsheet', is => 'rw', isa => 'ArrayRef';
+has 'maxcol',      is => 'rw', isa => 'Int';
+has 'maxrow',      is => 'rw', isa => 'Int';
 
 =head1 NAME
 
@@ -83,7 +85,7 @@ sub save_contents {
     my ( $self, $filename, $header, $content ) = @_;
 
     my $excel = Spreadsheet::SimpleExcel->new();
-    
+
     $excel->add_worksheet( 'Sheet 1',
         { -headers => $header, -data => $content } );
 
@@ -117,25 +119,19 @@ Checks to see if a row contains a regular expression pattern, if matches adds to
 sub row_contains {
 
     my ( $self, $pattern ) = @_;
-
     my @results_array;
-    my $total_results = 0;
-    my $num_sheets    = @{ $self->spreadsheet } - 1;
-    my $cell          = ' ';
+    my $num_sheets = @{ $self->spreadsheet } - 1;
 
     for my $sheet ( 1 .. $num_sheets ) {
-        my $maxrow = $self->spreadsheet->[$sheet]{maxrow};
-        my $maxcol = $self->spreadsheet->[$sheet]{maxcol};
-        for my $row ( 2 .. $maxrow ) {
-            for my $col ( 1 .. $maxcol ) {
-                $cell = $self->spreadsheet->[$sheet]{ cr2cell( $col, $row ) };
-                if ( $cell =~ /$pattern/ ) {
-                    push @results_array, $self->get_row_contents($row);
-                    last;
-                }
+        for my $row ( 1 .. $self->maxrow ) {
+            my $cell = $self->get_row_contents($row);
+            if ( $cell =~ /$pattern/ ) {
+                push @results_array, $self->get_row_contents($row);
+                last;
             }
         }
     }
+
     return @results_array;
 }
 
@@ -148,8 +144,11 @@ Returns array of headers.
 sub get_headers {
     my ($self) = @_;
 
+    #get_row_contents appends a row number to the front
+    #remove by splitting and shifting
     my @return_array = split ':', $self->get_row_contents(1);
     shift @return_array;
+
     return @return_array;
 }
 
@@ -165,11 +164,11 @@ sub get_contents {
     $sheet = 1 unless defined $sheet;
 
     my @return_contents;
-    my $maxrow = $self->spreadsheet->[$sheet]{maxrow};
-    for my $row ( 2 .. $maxrow ) {
+    $self->maxrow( $self->spreadsheet->[$sheet]{maxrow} );
+    for my $row ( 2 .. $self->maxrow ) {
         my @row_contents;
-        my $maxcol = $self->spreadsheet->[$sheet]{maxcol};
-        for my $col ( 1 .. $maxcol ) {
+        $self->maxcol( $self->spreadsheet->[$sheet]{maxcol} );
+        for my $col ( 1 .. $self->maxcol ) {
             my $cell = $self->spreadsheet->[$sheet]{ cr2cell( $col, $row ) };
             push @row_contents, $cell;
         }
@@ -212,7 +211,29 @@ sub prepare_to_insert {
             @{ $insert_array->[$column][$s] } = @tmp_insert;
         }
     }
-    return;
+
+    return 1;
+}
+
+=head2 add_insert_array(@insert_arr, @contents, $column, $self->maxcolumn); 
+
+Adds new rows into current contents.
+
+=cut
+
+sub add_insert_array {
+    my ( $self, $insert_array, $content_array, $row_num, $column ) = @_;
+
+    # Splice required fields into content
+    if ( $column == $self->maxcol - 1 && @{$insert_array} ) {
+        foreach my $colref ( @{$insert_array} ) {
+            foreach my $arr (@$colref) {
+                if ( defined $arr ) {
+                    splice @{$content_array}, $row_num, 0, $arr;
+                }
+            }
+        }
+    }
 }
 
 =head2 row_split(row, delimiter(s), optional column) 
@@ -229,7 +250,6 @@ sub row_split {
 
     my @insert_array = ();
     my $row_num      = 0;
-    my $maxcol       = $self->spreadsheet->[1]{maxcol};
 
     foreach my $arrayref (@content) {
         my $column = 0;
@@ -257,16 +277,8 @@ sub row_split {
                     }
                 }
 
-                # Splice required fields into content
-                if ( $column == $maxcol - 1 && @insert_array ) {
-                    foreach my $colref (@insert_array) {
-                        foreach my $arr (@$colref) {
-                            if ( defined $arr ) {
-                                splice @content, $row_num, 0, $arr;
-                            }
-                        }
-                    }
-                }
+                $self->add_insert_array( \@insert_array, \@content, $row_num,
+                    $column );
 
                 #Inc current column
                 $column += 1;
