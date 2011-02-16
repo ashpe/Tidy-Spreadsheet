@@ -26,7 +26,7 @@ is_deeply \@csv_headers,
   'get_headers() - csv'
   or diag explain \@csv_headers;
 
-my @csv_contents = $spreadsheet->get_contents();
+my @csv_contents = $spreadsheet->get_contents(1);
 is_deeply \@csv_contents,
   [
     [ '1',         '2',     '3',        '4',   '5',   '6' ],
