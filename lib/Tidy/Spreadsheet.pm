@@ -83,7 +83,7 @@ sub save_contents {
     my ( $self, $filename, $header, $content ) = @_;
 
     my $excel = Spreadsheet::SimpleExcel->new();
-    print keys $self->spreadsheet{sheet};
+    
     $excel->add_worksheet( 'Sheet 1',
         { -headers => $header, -data => $content } );
 
