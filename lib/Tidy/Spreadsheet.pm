@@ -2,11 +2,14 @@ package Tidy::Spreadsheet;
 
 use warnings;
 use strict;
+use Moose;
 use Readonly;
 use Spreadsheet::Read;
 use Spreadsheet::SimpleExcel;
 use Carp qw( croak );
 Readonly my $NOT_PROVIDED => -1;
+
+has 'spreadsheet', is => 'rw', isa => 'ArrayRef';
 
 =head1 NAME
 
@@ -45,10 +48,10 @@ example; Tidy::Spreadsheet->load_spreadsheet("spreadsheet.csv", ",");
 
 =cut
 
-sub new {
-    my $package = shift;
-    return bless {}, $package;
-}
+#sub new {
+#    my $package = shift;
+#    return bless {}, $package;
+#}
 
 sub load_spreadsheet {
 
@@ -58,7 +61,7 @@ sub load_spreadsheet {
 
     if ( $file_name =~ /.csv$/ ) {
         if ( defined $delimiter ) {
-            $self->{spreadsheet} = ReadData( $file_name, sep => $delimiter );
+            $self->spreadsheet( ReadData( $file_name, sep => $delimiter ) );
             return 1;
         }
         else {
@@ -66,11 +69,11 @@ sub load_spreadsheet {
         }
     }
     elsif ( $file_name =~ /.xls$/ ) {
-        $self->{spreadsheet} = ReadData( $file_name, parser => 'xls' );
+        $self->spreadsheet( ReadData( $file_name, parser => 'xls') );    
         return 1;
     }
     else {
-        $self->{spreadsheet} = ReadData($file_name);
+        $self->spreadsheet( ReadData($file_name) );
         return 1;
     }
 
@@ -109,7 +112,7 @@ sub get_row_contents {
     $sheet_num = 1 unless defined $sheet_num;
 
     my @get_row =
-      Spreadsheet::Read::row( $self->{spreadsheet}->[$sheet_num], $row_num );
+      Spreadsheet::Read::row( $self->spreadsheet->[$sheet_num], $row_num );
     my $return_value = "$row_num:" . join ':', @get_row;
     return $return_value;
 }
@@ -126,19 +129,18 @@ sub row_contains {
 
     my @results_array;
     my $total_results = 0;
-    my $num_sheets    = @{$self->{spreadsheet}} - 1;
+    my $num_sheets    = @{$self->spreadsheet} - 1;
     my $cell          = ' ';
 
     for my $sheet ( 1 .. $num_sheets ) {
-        my $maxrow = $self->{spreadsheet}->[$sheet]{maxrow};
-        my $maxcol = $self->{spreadsheet}->[$sheet]{maxcol};
+        my $maxrow = $self->spreadsheet->[$sheet]{maxrow};
+        my $maxcol = $self->spreadsheet->[$sheet]{maxcol};
         for my $row ( 2 .. $maxrow ) {
             for my $col ( 1 .. $maxcol ) {
-                $cell = $self->{spreadsheet}->[$sheet]{ cr2cell( $col, $row ) };
+                $cell = $self->spreadsheet->[$sheet]{ cr2cell( $col, $row ) };
                 if ( $cell =~ /$pattern/ ) {
-                    $results_array[$total_results] =
-                      $self->get_row_contents($row);
-                    $total_results += 1;
+                   push @results_array, $self->get_row_contents($row);
+                   last;
                 }
             }
         }
@@ -171,15 +173,15 @@ sub get_contents {
     my ( $self, $sheet ) = @_;
     $sheet = 1 unless defined $sheet;
 
-    my $maxrow = $self->{spreadsheet}->[$sheet]{maxrow};
-    my $maxcol = $self->{spreadsheet}->[$sheet]{maxcol};
+    my $maxrow = $self->spreadsheet->[$sheet]{maxrow};
+    my $maxcol = $self->spreadsheet->[$sheet]{maxcol};
     my $cell   = ' ';
     my @return_contents;
 
     for my $row ( 2 .. $maxrow ) {
         my @row_contents;
         for my $col ( 1 .. $maxcol ) {
-            $cell = $self->{spreadsheet}->[$sheet]{ cr2cell( $col, $row ) };
+            $cell = $self->spreadsheet->[$sheet]{ cr2cell( $col, $row ) };
             push @row_contents, $cell;
         }
         push @return_contents, \@row_contents;
@@ -201,7 +203,7 @@ sub prepare_to_insert {
 
     for ( my $s = 1 ; $s < scalar @{$split_array} ; $s++ ) {
         my @tmp_array = ();
-        if ( scalar( @{$split_array} ) >= 2 ) {
+        if ( scalar( @{$split_array} ) > 2 ) {
             @tmp_array = $split_array->[$s];
         }
         else {
@@ -238,7 +240,7 @@ sub row_split {
 
     my @insert_array = ();
     my $row_num      = 0;
-    my $maxcol       = $self->{spreadsheet}->[1]{maxcol};
+    my $maxcol       = $self->spreadsheet->[1]{maxcol};
 
     foreach my $arrayref (@content) {
         my $column = 0;
