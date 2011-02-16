@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use Moose;
 use Readonly;
+use Modern::Perl;
 use Spreadsheet::Read;
 use Spreadsheet::SimpleExcel;
 use Carp qw( croak );
