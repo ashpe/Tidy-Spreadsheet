@@ -36,26 +36,28 @@ is_deeply \@row_contains, ['7:last,:test,:row,test:ok :one:two'],
                            or diag explain \@row_contains;
 
 my @csv_splitcol = $spreadsheet->col_split(2, ",", 2, \@csv_headers);
-is_deeply \@csv_splitcol, [['1','2',' ',' ','3','4','5','6'],
+is_deeply \@csv_splitcol, [
+                          ['1','2',' ',' ','3','4','5','6'],
                           ['a','b',' ',' ','c','d','e','f'],
                           ['What, the','1 ',' 2',' ',',3','123','45','3'],
                           ['1','2',' ',' ','3','4','5','6'],
                           ['a,b','w',' ',' ','2,3,4,5','4','5','2,1,6'],
-                          ['last,','test',' ',' ','row,test','ok ','one','two']],
-                          'get_contents() - csv' 
+                          ['last,','test',' ',' ','row,test','ok ','one','two'],
+                      ],
+                      'get_contents() - csv' 
                           or diag explain \@csv_splitcol; 
 
 my @csv_rowsplit = $spreadsheet->row_split(2, ",", 1);
 is_deeply \@csv_rowsplit, [
                         [(1 .. 6)],
-                        [qw(a b c d e f)],
+                        [('a' .. 'f')],
                         [' ',' 2'],
                         ['What, the','1 ',',3','123','45','3'],
                         [(1 .. 6)],
                         ['a,b','w','2,3,4,5','4','5','2,1,6'],
                         ['last,','test','row,test','ok ','one','two'],
-                        ],
-                         'row_split() - csv' 
+                    ],
+                    'row_split() - csv' 
                          or diag explain \@csv_rowsplit;
 
 

@@ -48,11 +48,6 @@ example; Tidy::Spreadsheet->load_spreadsheet("spreadsheet.csv", ",");
 
 =cut
 
-#sub new {
-#    my $package = shift;
-#    return bless {}, $package;
-#}
-
 sub load_spreadsheet {
 
     #TODO: Add error checking once spreadsheet is loaded
@@ -173,15 +168,13 @@ sub get_contents {
     my ( $self, $sheet ) = @_;
     $sheet = 1 unless defined $sheet;
 
-    my $maxrow = $self->spreadsheet->[$sheet]{maxrow};
-    my $maxcol = $self->spreadsheet->[$sheet]{maxcol};
-    my $cell   = ' ';
     my @return_contents;
-
+    my $maxrow = $self->spreadsheet->[$sheet]{maxrow};
     for my $row ( 2 .. $maxrow ) {
         my @row_contents;
+        my $maxcol = $self->spreadsheet->[$sheet]{maxcol}; 
         for my $col ( 1 .. $maxcol ) {
-            $cell = $self->spreadsheet->[$sheet]{ cr2cell( $col, $row ) };
+            my $cell = $self->spreadsheet->[$sheet]{ cr2cell( $col, $row ) };
             push @row_contents, $cell;
         }
         push @return_contents, \@row_contents;
@@ -201,7 +194,7 @@ sub prepare_to_insert {
 
     my ( $self, $column, $split_array, $insert_array ) = @_;
 
-    for ( my $s = 1 ; $s < scalar @{$split_array} ; $s++ ) {
+    for my $s ( 1 .. @{$split_array}-1 ) {
         my @tmp_array = ();
         if ( scalar( @{$split_array} ) > 2 ) {
             @tmp_array = $split_array->[$s];
@@ -383,58 +376,6 @@ sub col_split {
 
 =head1 AUTHOR
 
-Ashley Pope, C<< <ashleyp at cpan.org> >>
-
-=head1 BUGS
-
-Please report any bugs or feature requests to C<bug-tidy-spreadsheet at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Tidy-Spreadsheet>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
-    perldoc Tidy::Spreadsheet
-
-
-You can also look for information at:
-
-=over 4
-
-=item * RT: CPAN's request tracker
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Tidy-Spreadsheet>
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/Tidy-Spreadsheet>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/Tidy-Spreadsheet>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/Tidy-Spreadsheet/>
-
-=back
-
-
-=head1 ACKNOWLEDGEMENTS
-
-
-=head1 LICENSE AND COPYRIGHT
-
-Copyright 2011 Ashley Pope.
-
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
-
-See http://dev.perl.org/licenses/ for more information.
-
-
-=cut
+Ashley Pope
 
 1;    # End of Tidy::Spreadsheet
