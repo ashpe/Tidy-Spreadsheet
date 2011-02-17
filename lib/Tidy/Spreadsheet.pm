@@ -117,7 +117,7 @@ sub get_row_contents {
 
     my @get_row =
       Spreadsheet::Read::row( $self->spreadsheet->[$sheet_num], $row_num );
-    my $return_value = "$row_num:" . join ':', @get_row;
+    my $return_value = join ':', @get_row;
     return $return_value;
 }
 
@@ -158,7 +158,6 @@ sub get_headers {
     #get_row_contents appends a row number to the front
     #remove by splitting and shifting
     my @return_array = split ':', $self->get_row_contents(1);
-    shift @return_array;
 
     return @return_array;
 }

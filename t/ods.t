@@ -11,7 +11,7 @@ note 'Retrieve/editing row contents';
 {
     my $row_contents = $spreadsheet->get_row_contents( 1, 1 );
     is $row_contents,
-"1:Heading one:Heading two:Heading three:Heading four:Heading five:Heading six",
+"Heading one:Heading two:Heading three:Heading four:Heading five:Heading six",
       "row_contents with sheet specified";
 
     my @row_split = $spreadsheet->row_split( 2, "," );

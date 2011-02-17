@@ -48,7 +48,7 @@ my @csv_rowsplit = $spreadsheet->row_split( 2, ",", 1 );
 
 note 'Editing/splitting of the file'; {
     my @row_contains = $spreadsheet->row_contains('test');
-    is_deeply \@row_contains, ['7:last,:test,:row,test:ok :one:two'],
+    is_deeply \@row_contains, ['last,:test,:row,test:ok :one:two'],
       'row_contains() - csv'
       or diag explain \@row_contains;
 
