@@ -2,11 +2,9 @@ package Tidy::Spreadsheet;
 
 use Modern::Perl;
 use Moose;
-use Readonly;
 use Spreadsheet::Read;
 use Spreadsheet::SimpleExcel;
 use Carp qw( croak );
-Readonly my $NOT_PROVIDED => -1;
 
 has 'spreadsheet', is => 'rw', isa => 'ArrayRef';
 has 'maxcol',      is => 'rw', isa => 'Int';
@@ -220,9 +218,9 @@ sub prepare_to_insert {
                 $tmp_insert[$_] = $tmp_array[0];
             }
         }
-        if (@tmp_insert) {
+        #if ( @tmp_insert) {
             @{ $insert_array->[$column][$s] } = @tmp_insert;
-        }
+            #}
     }
 
     return 1;
@@ -255,7 +253,7 @@ Splits a row into multiple rows, depending on how many are found. Can specify a 
 
 sub row_split {
     my ( $self, $row, $delimiter, $col ) = @_;
-    $col = $NOT_PROVIDED unless defined $col;
+    $col = 'all' unless defined $col;
 
     my @content = $self->get_contents();
 
@@ -266,14 +264,12 @@ sub row_split {
         my $column = 0;
         @insert_array = ();
         foreach my $element (@$arrayref) {
-
+            # Removed if(defined $element) from here.
             # Check field has a value and it matches.
-            if ( defined $element ) {
                 if ( $element =~ /$delimiter/ && $element ne $delimiter ) {
                     my $tmp = $element;
                     my @split_array = split $delimiter, $tmp;
-                    if ( $col == $NOT_PROVIDED ) {
-
+                    if ( $col eq 'all' ) {
                         #Overwrite our old value/set new intoarray
                         $element = $split_array[0];
                         $self->prepare_to_insert( $column, \@split_array,
@@ -293,7 +289,6 @@ sub row_split {
 
                 #Inc current column
                 $column += 1;
-            }
         }
 
         #Inc current row
