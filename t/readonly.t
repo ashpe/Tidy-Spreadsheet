@@ -18,7 +18,7 @@ ok $spreadsheet->load_spreadsheet($readonly_dir . $readonly_files[0]),
 my @content = $spreadsheet->get_contents();
 my @headers = $spreadsheet->get_headers();
 
-note 'Attempting to overwrite read only files'; {
+note 'Attempting to overwrite read only files.'; {
 
     foreach  (@readonly_files) { 
         dies_ok { $spreadsheet->save_contents($readonly_dir . $_, \@headers, 

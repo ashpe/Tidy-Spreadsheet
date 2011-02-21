@@ -81,8 +81,6 @@ Saves file. Overwrites old file if required.
 sub save_contents {
 
     my ( $self, $filename, $header, $content ) = @_;
-    
-    #TODO: Add save to CSV file as it doesn't currently work. if (csv) {} else {}
 
     if ($filename =~ /.csv$/) {
         unshift @{$content}, $header;
@@ -99,7 +97,6 @@ sub save_contents {
         $excel->add_worksheet( 'Sheet 1',
             { -headers => $header, -data => $content } );
 
-        $excel->add_row_at("Sheet 1", 0, [qw/one row has been added/]);           
         $excel->output_to_file($filename) or croak $excel->errstr();
 
         return 1;
