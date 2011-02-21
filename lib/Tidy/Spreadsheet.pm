@@ -2,6 +2,7 @@ package Tidy::Spreadsheet;
 
 use Modern::Perl;
 use Moose;
+use Smart::Comments;
 use Spreadsheet::Read;
 use Spreadsheet::SimpleExcel;
 use Carp qw( croak );
@@ -54,19 +55,19 @@ sub load_spreadsheet {
     if ( $file_name =~ /.csv$/ ) {
         if ( defined $delimiter ) {
             $self->spreadsheet( ReadData( $file_name, sep => $delimiter ) );
-            return 1;
+            return 1;  
         }
         else {
             return 0;
         }
     }
     elsif ( $file_name =~ /.xls$/ ) {
-        $self->spreadsheet( ReadData( $file_name, parser => 'xls' ) );
-        return 1;
+            $self->spreadsheet( ReadData( $file_name, parser => 'xls' ) );
+            return 1;
     }
     else {
-        $self->spreadsheet( ReadData($file_name) );
-        return 1;
+            $self->spreadsheet( ReadData($file_name) );
+            return 1;
     }
 
 }
@@ -98,7 +99,7 @@ sub save_contents {
         $excel->add_worksheet( 'Sheet 1',
             { -headers => $header, -data => $content } );
 
-            
+        $excel->add_row_at("Sheet 1", 0, [qw/one row has been added/]);           
         $excel->output_to_file($filename) or croak $excel->errstr();
 
         return 1;
